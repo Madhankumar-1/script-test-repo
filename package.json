@@ -1,0 +1,22 @@
+{
+     "name": "pm2-node-app",
+     "version": "1.0.0",
+     "main": "index.js",
+     "scripts": {
+          "start": "pm2 start ecosystem.config.js",
+          "restart": "pm2 restart ecosystem.config.js",
+          "stop": "pm2 stop ecosystem.config.js",
+          "delete": "pm2 delete ecosystem.config.js",
+          "logs": "pm2 logs",
+          "status": "pm2 list",
+          "monitor": "pm2 monit",
+          "startup": "pm2 startup && pm2 save"
+     },
+     "keywords": [],
+     "author": "",
+     "license": "ISC",
+     "description": "",
+     "dependencies": {
+          "express": "^4.21.2"
+     }
+}
