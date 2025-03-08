@@ -14,16 +14,16 @@ const generateInstanceId = () => {
      return `inst-${Date.now()}`;
 };
 
-// Fetch the EC2 instance's private IP address
-const getInstanceIpAddress = async () => {
-     try {
-          const response = await axios.get("http://169.254.169.254/latest/meta-data/local-ipv4", {timeout: 2000});
-          return response.data;
-     } catch (error) {
-          console.error("Error fetching instance IP address:", error.message);
-          return "unknown";
-     }
-};
+// // Fetch the EC2 instance's private IP address
+// const getInstanceIpAddress = async () => {
+//      try {
+//           const response = await axios.get("http://169.254.169.254/latest/meta-data/local-ipv4", {timeout: 2000});
+//           return response.data;
+//      } catch (error) {
+//           console.error("Error fetching instance IP address:", error.message);
+//           return "unknown";
+//      }
+// };
 
 // Default route
 app.get("/", async (req, res) => {
@@ -117,3 +117,61 @@ app.delete("/items/:id", (req, res) => {
 app.listen(port, () => {
      console.log(`Server is running on http://localhost:${port}`);
 });
+
+
+// Metadata service URL
+const METADATA_URL = "http://169.254.169.254/latest/meta-data";
+
+// Step 1: Fetch the token
+const fetchToken = async () => {
+  try {
+    const response = await axios.put(
+      "http://169.254.169.254/latest/api/token",
+      {},
+      {
+        headers: {
+          "X-aws-ec2-metadata-token-ttl-seconds": "21600", // Token valid for 6 hours
+        },
+        timeout: 2000, // 2-second timeout
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching token:", error.message);
+    return null;
+  }
+};
+
+// Step 2: Fetch metadata using the token
+const fetchMetadata = async (token, path) => {
+  try {
+    const response = await axios.get(`${METADATA_URL}/${path}`, {
+      headers: {
+        "X-aws-ec2-metadata-token": token,
+      },
+      timeout: 2000, // 2-second timeout
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching metadata:", error.message);
+    return null;
+  }
+};
+
+// Main function
+const getInstanceIpAddress = async () => {
+  const token = await fetchToken();
+  if (!token) {
+    console.log("Failed to fetch token. Exiting.");
+    return;
+  }
+
+  // Fetch the private IP address
+  const privateIp = await fetchMetadata(token, "local-ipv4");
+  if (privateIp) {
+    console.log(`Private IP Address: ${privateIp}`);
+  } else {
+    console.log("Failed to fetch private IP address.");
+  }
+  return privateIp
+};
