@@ -46,6 +46,7 @@ app.get("/", async (req, res) => {
 // Route with path parameter
 app.get("/:pathParam", async (req, res) => {
      const {pathParam} = req.params;
+     const {message} = req.query;
      const machineId = await getInstanceIpAddress();
      const response = {
           instanceId: generateInstanceId(),
@@ -53,31 +54,11 @@ app.get("/:pathParam", async (req, res) => {
           type: "nodejs", // Default type
           deployment: "aws-ec2", // Default deployment
           pathParams: req.params, // Path parameter
-          queryParams: {}, // No query parameters
+          queryParams: req.query, // No query parameters
           method: req.method,
           path: req.path,
           startTime: new Date().toISOString(),
-          message: `Hello World, Pathparam: ${pathParam}, Queryparam: none`
-     };
-     res.json(response);
-});
-
-// Route with path parameter and query parameter
-app.get("/:pathParam/query", async (req, res) => {
-     const {pathParam} = req.params;
-     const {queryParam} = req.query;
-     const machineId = await getInstanceIpAddress();
-     const response = {
-          instanceId: generateInstanceId(),
-          machineId: machineId,
-          type: "nodejs", // Default type
-          deployment: "aws-ec2", // Default deployment
-          pathParams: req.params, // Path parameter
-          queryParams: req.query, // Query parameters
-          method: req.method,
-          path: req.path,
-          startTime: new Date().toISOString(),
-          message: `Hello World, Pathparam: ${pathParam}, Queryparam: ${queryParam || "none"}`
+          message:`Hello World, Pathparam: ${pathParam}, Queryparam: ${message || "none"}`
      };
      res.json(response);
 });
